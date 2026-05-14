@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Online Meeting</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="meeting-page">
+
+<header class="meeting-top">
+    <a href="index.html" class="meeting-logo">
+        <div class="big-logo">SH</div>
+        <div class="logo-text">
+            <h1>Smart Hybrid</h1>
+            <p>Meeting Room System</p>
+        </div>
+    </a>
+
+    <div>
+        <h2>Project Planning Meeting</h2>
+        <p>Room A • Today • 10:00 AM - 11:00 AM</p>
+    </div>
+</header>
+
+<main class="meeting-layout">
+
+    <section class="video-screen">
+        <div class="avatar" id="avatar">A</div>
+        <h3>You</h3>
+        <p id="cameraText">Camera is off</p>
+    </section>
+
+    <aside class="meeting-side" id="meetingSide">
+
+        <div id="participantsPanel">
+            <h3>Participants (3)</h3>
+            <p>🟣 Ahmed (You) <span>Host</span></p>
+            <p>🟠 Sara <span>Muted</span></p>
+            <p>🟢 Ali <span>Online</span></p>
+        </div>
+
+        <div id="chatPanel" style="display:none;">
+            <h3>Chat</h3>
+
+            <div class="chat-box" id="chatBox">
+                <p><strong>Sara:</strong> Good morning everyone.</p>
+                <p><strong>Ali:</strong> Ready to start.</p>
+            </div>
+
+            <div class="chat-input">
+                <input type="text" id="messageInput" placeholder="Type a message...">
+                <button onclick="sendMessage()">➤</button>
+            </div>
+        </div>
+
+    </aside>
+
+</main>
+
+<nav class="meeting-toolbar">
+    <button id="micBtn" onclick="toggleMic()">🎤<span>Mute</span></button>
+    <button id="camBtn" onclick="toggleCamera()">🎥<span>Camera</span></button>
+    <button id="shareBtn" onclick="toggleShare()">🖥<span>Share</span></button>
+    <button id="peopleBtn" onclick="showParticipants()">👥<span>People</span></button>
+    <button id="chatBtn" onclick="showChat()">💬<span>Chat</span></button>
+    <button id="byodBtn" onclick="showBYOD()">🔌<span>BYOD</span></button>
+    <button class="leave-btn" onclick="endMeeting()">Leave</button>
+</nav>
+
+<div id="byodPopup" class="popup">
+    <div class="popup-content">
+        <div class="checkmark-circle">✓</div>
+        <h2>BYOD Connected</h2>
+        <p>Your laptop has taken over the room system.</p>
+        <p class="small-note">Camera, microphones, and speakers are now available for Zoom, Webex, Google Meet, or Teams.</p>
+        <button onclick="closeBYOD()">Done</button>
+    </div>
+</div>
+
+<script>
+let micOn = true;
+let cameraOn = false;
+let sharing = false;
+
+function toggleMic() {
+    micOn = !micOn;
+    const btn = document.getElementById("micBtn");
+
+    if (micOn) {
+        btn.innerHTML = "🎤<span>Mute</span>";
+        btn.classList.remove("active-control");
+    } else {
+        btn.innerHTML = "🔇<span>Unmute</span>";
+        btn.classList.add("active-control");
+    }
+}
+
+function toggleCamera() {
+    cameraOn = !cameraOn;
+
+    const btn = document.getElementById("camBtn");
+    const avatar = document.getElementById("avatar");
+    const text = document.getElementById("cameraText");
+
+    if (cameraOn) {
+        btn.innerHTML = "📷<span>Stop</span>";
+        btn.classList.add("active-control");
+        avatar.style.display = "none";
+        text.innerText = "Camera is on";
+    } else {
+        btn.innerHTML = "🎥<span>Camera</span>";
+        btn.classList.remove("active-control");
+        avatar.style.display = "flex";
+        text.innerText = "Camera is off";
+    }
+}
+
+function toggleShare() {
+    sharing = !sharing;
+    const btn = document.getElementById("shareBtn");
+    const text = document.getElementById("cameraText");
+
+    if (sharing) {
+        btn.classList.add("active-control");
+        text.innerText = "You are sharing your screen";
+    } else {
+        btn.classList.remove("active-control");
+        text.innerText = cameraOn ? "Camera is on" : "Camera is off";
+    }
+}
+
+function showParticipants() {
+    document.getElementById("participantsPanel").style.display = "block";
+    document.getElementById("chatPanel").style.display = "none";
+    document.getElementById("peopleBtn").classList.add("active-control");
+    document.getElementById("chatBtn").classList.remove("active-control");
+}
+
+function showChat() {
+    document.getElementById("participantsPanel").style.display = "none";
+    document.getElementById("chatPanel").style.display = "block";
+    document.getElementById("chatBtn").classList.add("active-control");
+    document.getElementById("peopleBtn").classList.remove("active-control");
+}
+
+function sendMessage() {
+    const input = document.getElementById("messageInput");
+    const chatBox = document.getElementById("chatBox");
+
+    if (input.value.trim() !== "") {
+        chatBox.innerHTML += `<p><strong>You:</strong> ${input.value}</p>`;
+        input.value = "";
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+}
+
+function showBYOD() {
+    document.getElementById("byodPopup").style.display = "flex";
+    document.getElementById("byodBtn").classList.add("active-control");
+}
+
+function closeBYOD() {
+    document.getElementById("byodPopup").style.display = "none";
+}
+
+function endMeeting() {
+    window.location.href = "index.html";
+}
+</script>
+
+</body>
+</html>

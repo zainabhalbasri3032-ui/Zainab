@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Book a Room</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="booking-page">
+
+<div class="app-layout">
+   <aside class="sidebar">
+
+    <a href="index.html" class="sidebar-logo">
+        <div class="big-logo">SH</div>
+
+        <div class="logo-text">
+            <h1>Smart Hybrid</h1>
+            <p>Meeting Room System</p>
+        </div>
+    </a>
+
+    <a href="dashboard.html">📊 Dashboard</a>
+    <a href="book.html" class="active">📅 Book a Room</a>
+    <a href="bookings.html">📋 My Bookings</a>
+    <a href="rooms.html">🏢 Rooms</a>
+    <a href="devices.html">📹 Devices</a>
+    <a href="profile.html">👤 Profile</a>
+
+</aside>
+    <main class="content">
+        <h1>Book a Room</h1>
+        <p class="subtitle">Reserve a meeting room for your session.</p>
+
+        <div class="booking-grid">
+            <section class="booking-card">
+                <form id="bookingForm">
+
+                    <label>Select Room</label>
+                    <select id="room" onchange="updateSchedule()">
+                        <option value="Room A">Room A</option>
+                        <option value="Room B">Room B</option>
+                        <option value="Conference Hall">Conference Hall</option>
+                    </select>
+
+                    <label>Date</label>
+                    <input type="date" id="date" required onchange="updateSchedule()">
+
+                    <div class="time-row">
+                        <div>
+                            <label>Start Time</label>
+                            <input type="time" id="start" required>
+                        </div>
+
+                        <div>
+                            <label>End Time</label>
+                            <input type="time" id="end" required>
+                        </div>
+                    </div>
+
+                    <label>Meeting Type</label>
+<select id="meetingType">
+    <option>Physical Meeting</option>
+    <option>Hybrid Meeting</option>
+    <option>Online Meeting</option>
+</select>
+
+<label>Room Device Mode</label>
+<select id="deviceMode">
+    <option>VBS - Video Bar System</option>
+    <option>BYOD - Bring Your Own Device</option>
+</select>
+
+<label>Meeting Platform</label>
+<select id="platform">
+    <option>Microsoft Teams</option>
+    <option>Zoom</option>
+    <option>Webex</option>
+    <option>Google Meet</option>
+</select>
+                    <label>Meeting Purpose</label>
+                    <input type="text" id="purpose" placeholder="Project discussion">
+
+                    <div class="readiness-box">
+                    <h3>Room Readiness</h3>
+                    <p>✅ Camera Connected</p>
+                    <p>✅ Microphones Active</p>
+                    <p>✅ Speakers Ready</p>
+                    <p>✅ Internet Stable</p>
+                    <p>✅ Touch Controller Online</p>
+</div>
+                    <button type="submit">Check Availability</button>
+                </form>
+            </section>
+
+            <section class="schedule-card">
+                <h3 id="scheduleTitle">Room Schedule</h3>
+                <p class="schedule-date" id="scheduleDate"></p>
+                <div id="scheduleList"></div>
+            </section>
+        </div>
+
+        <section class="upcoming">
+            <h3>Your Upcoming Bookings</h3>
+
+            <table>
+                <tr>
+                    <th>Room</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+
+                <tr>
+                    <td>Room A</td>
+                    <td>Today</td>
+                    <td>10:00 - 11:00</td>
+                    <td><span class="confirmed">Confirmed</span></td>
+                    <td><a href="meeting.html">Join</a></td>
+                </tr>
+            </table>
+        </section>
+    </main>
+</div>
+
+<div id="unavailablePopup" class="popup">
+    <div class="popup-content warning">
+        <button class="close-btn" onclick="closeUnavailable()">×</button>
+        <div class="warning-icon">!</div>
+        <h2>Time Unavailable</h2>
+        <p>This room is already booked for the selected time.</p>
+        <div class="danger-box" id="conflictText"></div>
+        <button onclick="closeUnavailable()">Choose Another Time</button>
+    </div>
+</div>
+
+<div id="successPopup" class="popup">
+    <div class="popup-content">
+        <div class="checkmark-circle">✓</div>
+        <h2>Booking Confirmed!</h2>
+        <p>Your smart hybrid meeting room has been successfully reserved.</p>
+<p class="small-note">Room device mode and meeting platform have been configured.</p>
+        <a href="meeting.html" class="popup-link">Go to Booked Session</a>
+    </div>
+</div>
+
+<script>
+const bookedSessions = [
+    { room: "Room A", date: todayDate(), start: "10:00", end: "11:00", purpose: "Team Standup" },
+    { room: "Room A", date: todayDate(), start: "12:00", end: "13:00", purpose: "Client Meeting" },
+
+    { room: "Room B", date: todayDate(), start: "09:00", end: "10:00", purpose: "Interview" },
+    { room: "Room B", date: "2026-05-09", start: "14:00", end: "15:00", purpose: "Design Review" },
+
+    { room: "Conference Hall", date: todayDate(), start: "11:00", end: "12:00", purpose: "Presentation" },
+    { room: "Conference Hall", date: "2026-05-10", start: "16:00", end: "17:00", purpose: "Workshop" }
+];
+
+const timeSlots = [
+    { start: "09:00", end: "10:00" },
+    { start: "10:00", end: "11:00" },
+    { start: "11:00", end: "12:00" },
+    { start: "12:00", end: "13:00" },
+    { start: "14:00", end: "15:00" },
+    { start: "16:00", end: "17:00" }
+];
+
+function todayDate() {
+    return new Date().toISOString().split("T")[0];
+}
+
+function formatTime(time) {
+    let [hour, minute] = time.split(":");
+    hour = Number(hour);
+
+    const ampm = hour >= 12 ? "PM" : "AM";
+    const displayHour = hour % 12 || 12;
+
+    return `${displayHour}:${minute} ${ampm}`;
+}
+
+function updateSchedule() {
+    const room = document.getElementById("room").value;
+    const date = document.getElementById("date").value;
+    const list = document.getElementById("scheduleList");
+
+    document.getElementById("scheduleTitle").innerText = "Room Schedule - " + room;
+    document.getElementById("scheduleDate").innerText = "Date: " + date;
+
+    list.innerHTML = "";
+
+    timeSlots.forEach(slot => {
+        const booked = bookedSessions.find(b =>
+            b.room === room &&
+            b.date === date &&
+            b.start === slot.start &&
+            b.end === slot.end
+        );
+
+        list.innerHTML += `
+            <div class="slot ${booked ? "booked-slot" : "available-slot"}">
+                <strong>${formatTime(slot.start)} - ${formatTime(slot.end)}</strong>
+                <span>${booked ? "Booked - " + booked.purpose : "Available"}</span>
+            </div>
+        `;
+    });
+}
+
+document.getElementById("bookingForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const room = document.getElementById("room").value;
+    const date = document.getElementById("date").value;
+    const start = document.getElementById("start").value;
+    const end = document.getElementById("end").value;
+
+    const conflict = bookedSessions.find(booking =>
+        booking.room === room &&
+        booking.date === date &&
+        start < booking.end &&
+        end > booking.start
+    );
+
+    if (conflict) {
+        document.getElementById("conflictText").innerText =
+            "Booked Time: " + formatTime(conflict.start) + " - " + formatTime(conflict.end);
+
+        document.getElementById("unavailablePopup").style.display = "flex";
+    } else {
+        document.getElementById("successPopup").style.display = "flex";
+    }
+});
+
+function closeUnavailable() {
+    document.getElementById("unavailablePopup").style.display = "none";
+}
+
+window.onload = function () {
+    const params = new URLSearchParams(window.location.search);
+    const selectedRoom = params.get("room");
+
+    document.getElementById("date").value = todayDate();
+
+    if (
+        selectedRoom === "Room A" ||
+        selectedRoom === "Room B" ||
+        selectedRoom === "Conference Hall"
+    ) {
+        document.getElementById("room").value = selectedRoom;
+    }
+
+    updateSchedule();
+};
+</script>
+
+</body>
+</html>
